@@ -10,7 +10,7 @@ body {
 
 h1 {
   text-align: center;
-  margin: 2em 0em;
+  margin: 1em 0em;
   font-size: 2.5em;
 }
 
@@ -31,4 +31,14 @@ div {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.spinner {
+  background-color: aqua;
+  margin: 1em auto;
+  width: fit-content;
+}
+
+.hidden {
+  visibility: hidden;
 }

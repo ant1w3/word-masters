@@ -1,8 +1,11 @@
 let count = 0;
 let guess = "";
 let running = "";
+let wordOfTheDay;
+let isLoading = true;
 
 const letters = document.querySelectorAll(".letter");
+const spinner = document.querySelector(".spinner");
 
 function isLetter(letter) {
   return /^[a-zA-Z]$/.test(letter);
@@ -28,6 +31,7 @@ function handleLetter(key) {
 }
 
 async function handleEnter() {
+  console.log(wordOfTheDay);
   const res = await fetch("https://words.dev-apis.com/validate-word", {
     method: "POST",
     body: JSON.stringify({ word: guess }),
@@ -36,14 +40,31 @@ async function handleEnter() {
   const validation = await res.json();
 
   if (validation.validWord) {
-    console.log("here");
     running = guess + running;
     guess = "";
+
+    // grey background on all boxes
+    // yellow background if one or more letter in wrong place
+    // green if one or more letter in right place
   } else {
+    //flash boxes in red
     // continue typing
     return;
   }
 }
+
+async function getWordOfTheDay() {
+  //   isLoading = true;
+  const res = await fetch("https://words.dev-apis.com/word-of-the-day");
+  const obj = await res.json();
+
+  isLoading = false;
+  spinner.classList.add("hidden");
+
+  wordOfTheDay = obj.word.toUpperCase();
+}
+
+getWordOfTheDay();
 
 addEventListener("keydown", (event) => {
   const key = event.key;
@@ -57,6 +78,10 @@ addEventListener("keydown", (event) => {
   }
 
   if (isLetter(key)) {
-    handleLetter(key);
+    handleLetter(key.toUpperCase());
   }
 });
+
+document
+  .querySelector(".click")
+  .addEventListener("click", () => spinner.classList.add("hidden"));
