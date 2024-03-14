@@ -1,6 +1,6 @@
 let count = 0;
-let word = "";
-let runningWord = "";
+let guess = "";
+let running = "";
 
 const letters = document.querySelectorAll(".letter");
 
@@ -9,41 +9,46 @@ function isLetter(letter) {
 }
 
 function handleDelete() {
-  word = word.slice(0, -1);
-  letters[word.length + runningWord.length].innerHTML = "";
+  guess = guess.slice(0, -1);
+  letters[guess.length + running.length].innerHTML = "";
 }
 
 function handleLetter(key) {
-  if (word.length === 5) {
-    word = word.slice(0, -1) + key;
-    letters[word.length - 1 + runningWord.length].innerHTML = key;
+  if (guess.length === 5) {
+    guess = guess.slice(0, -1) + key;
+    letters[guess.length - 1 + running.length].innerHTML = key;
 
-    // console.log("if word:", word);
+    // console.log("if guess:", guess);
   } else {
-    word += key;
-    letters[word.length - 1 + runningWord.length].innerHTML = key;
+    guess += key;
+    letters[guess.length - 1 + running.length].innerHTML = key;
 
-    // console.log("else word:", word);
+    // console.log("else guess:", guess);
   }
 }
 
-function handleEnter() {
-  console.log("word:", word);
+async function handleEnter() {
+  const res = await fetch("https://words.dev-apis.com/validate-word", {
+    method: "POST",
+    body: JSON.stringify({ word: guess }),
+  });
 
-  let valid = true;
+  const validation = await res.json();
 
-  if (valid) {
-    runningWord = word + runningWord;
-    word = "";
+  if (validation.validWord) {
+    console.log("here");
+    running = guess + running;
+    guess = "";
   } else {
     // continue typing
+    return;
   }
 }
 
 addEventListener("keydown", (event) => {
   const key = event.key;
 
-  if (key === "Enter" && word.length === 5) {
+  if (key === "Enter" && guess.length === 5) {
     handleEnter();
   }
 
