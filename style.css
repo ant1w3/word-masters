@@ -42,3 +42,19 @@ div {
 .hidden {
   visibility: hidden;
 }
+
+.red {
+  border: 0.3em solid red;
+}
+
+.grey {
+  background-color: lightgray;
+}
+
+.green {
+  background-color: green;
+}
+
+.yellow {
+  background-color: yellow;
+}

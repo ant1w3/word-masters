@@ -1,8 +1,10 @@
 let count = 0;
+let row = 0;
 let guess = "";
 let running = "";
 let wordOfTheDay;
 let isLoading = true;
+const GUESS_LENGTH = 5;
 
 const letters = document.querySelectorAll(".letter");
 const spinner = document.querySelector(".spinner");
@@ -32,6 +34,8 @@ function handleLetter(key) {
 
 async function handleEnter() {
   console.log(wordOfTheDay);
+
+  // Post the guess
   const res = await fetch("https://words.dev-apis.com/validate-word", {
     method: "POST",
     body: JSON.stringify({ word: guess }),
@@ -41,32 +45,51 @@ async function handleEnter() {
 
   if (validation.validWord) {
     running = guess + running;
-    guess = "";
 
-    // grey background on all boxes
-    // yellow background if one or more letter in wrong place
-    // green if one or more letter in right place
+    for (let i = 0; i < GUESS_LENGTH; i++) {
+      let isTheLetterInWordOfTheDay = wordOfTheDay.indexOf(guess[i]);
+      let areLettersEqual = wordOfTheDay[i] === guess[i] ? true : false;
+
+      if (isTheLetterInWordOfTheDay === 0 && !areLettersEqual) {
+        letters[i + GUESS_LENGTH * row].classList.add("yellow");
+      } else if (wordOfTheDay[i] === guess[i]) {
+        letters[i + GUESS_LENGTH * row].classList.add("green");
+      } else {
+        letters[i + GUESS_LENGTH * row].classList.add("grey");
+      }
+    }
+
+    guess = "";
+    row++;
   } else {
-    //flash boxes in red
-    // continue typing
-    return;
+    // add a red border for invalid word
+    for (let i = 0; i < GUESS_LENGTH; i++) {
+      letters[i + GUESS_LENGTH * row].classList.add("red");
+    }
+
+    // remove red border after 1 sec
+    setTimeout(() => {
+      for (let i = 0; i < GUESS_LENGTH; i++) {
+        letters[i + GUESS_LENGTH * row].classList.remove("red");
+      }
+    }, 1000);
   }
 }
 
 async function getWordOfTheDay() {
-  //   isLoading = true;
   const res = await fetch("https://words.dev-apis.com/word-of-the-day");
   const obj = await res.json();
 
-  isLoading = false;
   spinner.classList.add("hidden");
 
   wordOfTheDay = obj.word.toUpperCase();
 }
 
+// the the word of the day
 getWordOfTheDay();
 
-addEventListener("keydown", (event) => {
+// listen events
+document.addEventListener("keydown", (event) => {
   const key = event.key;
 
   if (key === "Enter" && guess.length === 5) {
@@ -81,7 +104,3 @@ addEventListener("keydown", (event) => {
     handleLetter(key.toUpperCase());
   }
 });
-
-document
-  .querySelector(".click")
-  .addEventListener("click", () => spinner.classList.add("hidden"));
