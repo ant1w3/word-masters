@@ -1,8 +1,6 @@
-let count = 0;
 let row = 0;
 let guess = "";
-let running = "";
-let wordOfTheDay;
+let answer;
 let isLoading = true;
 const GUESS_LENGTH = 5;
 
@@ -15,25 +13,63 @@ function isLetter(letter) {
 
 function handleDelete() {
   guess = guess.slice(0, -1);
-  letters[guess.length + running.length].innerHTML = "";
+  letters[guess.length + row * 5].innerHTML = "";
 }
 
 function handleLetter(key) {
-  if (guess.length === 5) {
+  if (guess.length === GUESS_LENGTH) {
     guess = guess.slice(0, -1) + key;
-    letters[guess.length - 1 + running.length].innerHTML = key;
-
-    // console.log("if guess:", guess);
+    letters[guess.length - 1 + row * 5].innerHTML = key;
   } else {
     guess += key;
-    letters[guess.length - 1 + running.length].innerHTML = key;
-
-    // console.log("else guess:", guess);
+    letters[guess.length - 1 + row * 5].innerHTML = key;
   }
 }
 
+function correctWord() {
+  for (let i = 0; i < GUESS_LENGTH; i++) {
+    const splittedGuess = answer.split("");
+    let isCurrentLetterInAnswer = splittedGuess.includes(guess[i]);
+    let areLettersEqual = guess[i] === answer[i] ? true : false;
+
+    if (areLettersEqual) {
+      letters[i + GUESS_LENGTH * row].classList.add("green");
+    } else if (isCurrentLetterInAnswer && !areLettersEqual) {
+      letters[i + GUESS_LENGTH * row].classList.add("yellow");
+    } else {
+      letters[i + GUESS_LENGTH * row].classList.add("grey");
+    }
+  }
+
+  // Tell user he wins
+  if (guess === answer) {
+    alert("YOU WIN !!!");
+    return;
+  }
+
+  guess = "";
+  row++;
+}
+
+function wrongWord() {
+  // add a red border for invalid word
+  for (let i = 0; i < GUESS_LENGTH; i++) {
+    letters[i + GUESS_LENGTH * row].classList.add("red");
+  }
+
+  // remove red border after 1 sec
+  setTimeout(() => {
+    for (let i = 0; i < GUESS_LENGTH; i++) {
+      letters[i + GUESS_LENGTH * row].classList.remove("red");
+    }
+  }, 1000);
+}
+
 async function handleEnter() {
-  console.log(wordOfTheDay);
+  console.log("Word of the Day:", answer);
+
+  // Enable spinner
+  spinner.classList.remove("hidden");
 
   // Post the guess
   const res = await fetch("https://words.dev-apis.com/validate-word", {
@@ -41,54 +77,34 @@ async function handleEnter() {
     body: JSON.stringify({ word: guess }),
   });
 
-  const validation = await res.json();
+  const { validWord } = await res.json();
 
-  if (validation.validWord) {
-    running = guess + running;
+  // Disable spinner
+  spinner.classList.add("hidden");
 
-    for (let i = 0; i < GUESS_LENGTH; i++) {
-      let isTheLetterInWordOfTheDay = wordOfTheDay.indexOf(guess[i]);
-      let areLettersEqual = wordOfTheDay[i] === guess[i] ? true : false;
+  validWord ? correctWord() : wrongWord();
 
-      if (isTheLetterInWordOfTheDay === 0 && !areLettersEqual) {
-        letters[i + GUESS_LENGTH * row].classList.add("yellow");
-      } else if (wordOfTheDay[i] === guess[i]) {
-        letters[i + GUESS_LENGTH * row].classList.add("green");
-      } else {
-        letters[i + GUESS_LENGTH * row].classList.add("grey");
-      }
-    }
-
-    guess = "";
-    row++;
-  } else {
-    // add a red border for invalid word
-    for (let i = 0; i < GUESS_LENGTH; i++) {
-      letters[i + GUESS_LENGTH * row].classList.add("red");
-    }
-
-    // remove red border after 1 sec
-    setTimeout(() => {
-      for (let i = 0; i < GUESS_LENGTH; i++) {
-        letters[i + GUESS_LENGTH * row].classList.remove("red");
-      }
-    }, 1000);
+  // Tell user he looses
+  if (row === 6 && guess != answer) {
+    alert("loose");
+    return;
   }
 }
 
-async function getWordOfTheDay() {
+async function getAnswer() {
   const res = await fetch("https://words.dev-apis.com/word-of-the-day");
   const obj = await res.json();
 
   spinner.classList.add("hidden");
 
-  wordOfTheDay = obj.word.toUpperCase();
+  answer = obj.word.toUpperCase();
+  // answer = "IVORY";
 }
 
-// the the word of the day
-getWordOfTheDay();
+// Get the the word of the day
+getAnswer();
 
-// listen events
+// Listen events
 document.addEventListener("keydown", (event) => {
   const key = event.key;
 
