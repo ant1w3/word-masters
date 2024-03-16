@@ -1,0 +1,60 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+h1 {
+  text-align: center;
+  margin: 1em 0em;
+  font-size: 2.5em;
+}
+
+.container {
+  width: 40%;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: repeat(5, 50px);
+  grid-template-rows: repeat(6, 50px);
+
+  justify-content: center;
+  gap: 1.5em 1.5em;
+}
+
+div {
+  border: 0.2em solid rgb(197, 189, 189);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  background-color: aqua;
+  margin: 1em auto;
+  width: fit-content;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.red {
+  border: 0.3em solid red;
+}
+
+.grey {
+  background-color: lightgray;
+}
+
+.green {
+  background-color: green;
+}
+
+.yellow {
+  background-color: yellow;
+}
